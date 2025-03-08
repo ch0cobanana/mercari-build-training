@@ -1,0 +1,14 @@
+name: CI Test Workflow
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: "Hello World の表示"
+        run: echo "GitHub Actions が動いています！"
