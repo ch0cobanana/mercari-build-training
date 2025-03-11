@@ -121,7 +121,7 @@ def add_item(
     category_row = cursor.fetchone()
 
     if category_row:
-        category_id = category_row["id"]
+        category_id = category_row["0"]
     else:
         # カテゴリが存在しない場合、新しく追加
         cursor.execute("INSERT INTO categories (name) VALUES (?)", (category,))
@@ -151,6 +151,7 @@ def add_item(
 
 @app.get("/items")
 def get_items(db: sqlite3.Connection = Depends(get_db)):
+    db.row_factory = sqlite3.Row 
     cursor = db.cursor()
     cursor.execute("SELECT * FROM items")
     # JOIN を使ってカテゴリ名を取得（変更点）
@@ -160,7 +161,7 @@ def get_items(db: sqlite3.Connection = Depends(get_db)):
            JOIN categories ON items.category_id = categories.id"""
     )
     rows = cursor.fetchall()
-    items_list = [{"name": name, "category": category, "image_name": image_name} for name, category, image_name in rows]
+    items_list = [{"name": row["name"], "category": row["category"], "image_name": row["image_name"]} for row in rows]
     
     
     return {"items": items_list}
