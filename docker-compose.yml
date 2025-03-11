@@ -3,7 +3,7 @@ services:
   api:
     image: mercari-build-training/app:latest  # 既にビルド済みのAPIイメージ
     ports:
-      - "8000:8000"
+      - "9000:9000"
     environment:
       - FRONT_URL=http://localhost:3000
     networks:
