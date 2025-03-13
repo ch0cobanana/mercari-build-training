@@ -35,7 +35,6 @@ export const Listing = ({ onListingCompleted }: Prop) => {
   };
   const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-<<<<<<< HEAD
 
     console.log("🚀 Form submitted!");  // ✅ デバッグログ
 
@@ -54,8 +53,6 @@ export const Listing = ({ onListingCompleted }: Prop) => {
   }
   
 
-=======
->>>>>>> main
     postItem({
       name: values.name,
       category: values.category,
