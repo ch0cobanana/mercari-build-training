@@ -66,10 +66,9 @@ export const postItem = async (input: CreateItemInput): Promise<Response> => {
 
 
   return response;
-
+  
 } catch (error) {
   console.error("❌ POST error:", error); // ✅ 追加: エラーが出た場合のログ
   throw error;
 }
-
 };
