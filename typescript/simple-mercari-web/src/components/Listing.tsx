@@ -35,6 +35,7 @@ export const Listing = ({ onListingCompleted }: Prop) => {
   };
   const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+<<<<<<< HEAD
 
     console.log("🚀 Form submitted!");  // ✅ デバッグログ
 
@@ -53,6 +54,8 @@ export const Listing = ({ onListingCompleted }: Prop) => {
   }
   
 
+=======
+>>>>>>> main
     postItem({
       name: values.name,
       category: values.category,
@@ -82,7 +85,6 @@ export const Listing = ({ onListingCompleted }: Prop) => {
             name="name"
             id="name"
             placeholder="name"
-            value={values.name} // ✅ 追加
             onChange={onValueChange}
             required
           />
@@ -91,7 +93,6 @@ export const Listing = ({ onListingCompleted }: Prop) => {
             name="category"
             id="category"
             placeholder="category"
-            value={values.category} // ✅ 追加
             onChange={onValueChange}
           />
           <input

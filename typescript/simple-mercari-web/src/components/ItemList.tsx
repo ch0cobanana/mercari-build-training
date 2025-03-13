@@ -40,11 +40,9 @@ export const ItemList = ({ reload, onLoadCompleted }: Prop) => {
           <div className="item-info">
             <h3>{item.name}</h3>
             <p>{item.category}</p>
-
-
           </div>
-        </div>
+        </div> // 修正: ここに閉じタグを追加
       ))}
     </div>
   );
-};
+}

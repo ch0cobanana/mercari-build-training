@@ -1,6 +1,4 @@
-const SERVER_URL = import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8000';
-
-console.log("SERVER_URL:", SERVER_URL);
+const SERVER_URL = import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:9000';
 
 export interface Item {
   id: number;
@@ -36,8 +34,6 @@ export interface CreateItemInput {
 }
 
 export const postItem = async (input: CreateItemInput): Promise<Response> => {
-  console.log("🚀 postItem() called with input:", input); // ✅ 追加: 関数が呼ばれたか確認
-
   const data = new FormData();
   data.append('name', input.name);
   data.append('category', input.category);
@@ -66,8 +62,4 @@ export const postItem = async (input: CreateItemInput): Promise<Response> => {
 
 
   return response;
- } catch (error) {
-    console.error("❌ POST error:", error); // ✅ 追加: エラーが出た場合のログ
-    throw error;
- }
 };
