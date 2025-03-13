@@ -16,7 +16,7 @@ from typing import Union
 # Define the path to the images & sqlite3 database
 images = pathlib.Path(__file__).parent.resolve() / "images"
 db = pathlib.Path(__file__).parent.resolve() / "db" / "mercari.sqlite3"
-
+sql_file = pathlib.Path(__file__).parent.resolve() / "db" / "items.sql"  # 🔹 **修正: SQL ファイルのパスを定義**
 
 def get_db():
     if not db.exists():
@@ -35,24 +35,12 @@ def setup_database():
     conn = sqlite3.connect(db) #SQLiteのデータベースに接続
     cursor = conn.cursor() #cursorオブジェクトを作成。cursorはデータベースに対してSQLコマンドを実行するために使われる
 
-    # カテゴリテーブルの作成（変更点）
-    cursor.execute(
-        """CREATE TABLE IF NOT EXISTS categories (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT UNIQUE NOT NULL
-        );"""
-    )
+    # 🔹 **SQL スクリプトを読み込んで実行**
+    if sql_file.exists():
+        with open(sql_file, "r", encoding="utf-8") as file:
+            sql_script = file.read()
+            cursor.executescript(sql_script)  # 🔹 **SQL スクリプトを実行**
 
-    # itemsテーブルの変更（category → category_id に変更）
-    cursor.execute(
-        """CREATE TABLE IF NOT EXISTS items (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            category_id INTEGER NOT NULL,
-            image_name TEXT NOT NULL,
-            FOREIGN KEY (category_id) REFERENCES categories(id)
-        );"""
-    )
     
     conn.commit() #commit()を呼び出してSQLの変更をデータベースに保存
     conn.close() #データベースとの接続を閉じる。開いたままにするとリソース無駄に消費
@@ -133,7 +121,7 @@ def add_item(
     category_row = cursor.fetchone()
 
     if category_row:
-        category_id = category_row["id"]
+        category_id = category_row["0"]
     else:
         # カテゴリが存在しない場合、新しく追加
         cursor.execute("INSERT INTO categories (name) VALUES (?)", (category,))
@@ -163,6 +151,7 @@ def add_item(
 
 @app.get("/items")
 def get_items(db: sqlite3.Connection = Depends(get_db)):
+    db.row_factory = sqlite3.Row 
     cursor = db.cursor()
     cursor.execute("SELECT * FROM items")
     # JOIN を使ってカテゴリ名を取得（変更点）
@@ -172,7 +161,11 @@ def get_items(db: sqlite3.Connection = Depends(get_db)):
            JOIN categories ON items.category_id = categories.id"""
     )
     rows = cursor.fetchall()
-    items_list = [{"name": name, "category": category, "image_name": image_name} for name, category, image_name in rows]
+<<<<<<< HEAD
+    items_list = [{"name": row["name"], "category": row["category"], "image_name": row["image_name"]} for row in rows]
+=======
+    items_list = [{"id": id, "name": name, "category": category, "image_name": image_name} for id, name, category, image_name in rows]
+>>>>>>> python-step9
     
     
     return {"items": items_list}
@@ -231,15 +224,14 @@ def get_item(item_id: int, db: sqlite3.Connection = Depends(get_db)):
 @app.get("/image/{image_name}")
 async def get_image(image_name: str):
     # Create image path
-    image = images / image_name
+    image = os.path.join(IMAGES_DIR, image_name)
 
     if not image_name.endswith(".jpg"):
         raise HTTPException(status_code=400, detail="Image path does not end with .jpg")
 
-    if not image.exists():
+    if not os.path.exists(image):
         logger.debug(f"Image not found: {image}")
-        image = images / "default.jpg"
+        image = os.path.join(IMAGES_DIR, "default.jpg")
 
 
     return FileResponse(image)
-
