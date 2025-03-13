@@ -166,7 +166,9 @@ def get_items(db: sqlite3.Connection = Depends(get_db)):
            JOIN categories ON items.category_id = categories.id"""
     )
     rows = cursor.fetchall()
+
     items_list = [{"name": row["name"], "category": row["category"], "image_name": row["image_name"]} for row in rows]
+
     
     
     return {"items": items_list}
@@ -233,6 +235,5 @@ async def get_image(image_name: str):
     if not os.path.exists(image):
         logger.debug(f"Image not found: {image}")
         image = os.path.join(IMAGES_DIR, "default.jpg")
-
 
     return FileResponse(image)

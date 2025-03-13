@@ -82,6 +82,7 @@ export const Listing = ({ onListingCompleted }: Prop) => {
             name="name"
             id="name"
             placeholder="name"
+            value={values.name} // ✅ 追加
             onChange={onValueChange}
             required
           />
@@ -90,6 +91,7 @@ export const Listing = ({ onListingCompleted }: Prop) => {
             name="category"
             id="category"
             placeholder="category"
+            value={values.category} // ✅ 追加
             onChange={onValueChange}
           />
           <input
