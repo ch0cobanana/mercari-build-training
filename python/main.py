@@ -11,6 +11,7 @@ import hashlib
 import shutil
 import json
 from typing import Union
+from fastapi.responses import Response
 
 
 # Define the path to the images & sqlite3 database
@@ -53,6 +54,21 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+# CORS 設定
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # フロントエンドのURL
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],  # すべてのHTTPメソッドを許可
+    allow_headers=["*"],  # すべてのヘッダーを許可
+)
+
+# ✅ `OPTIONS` メソッドを許可するエンドポイントを手動で追加
+@app.options("/items")
+async def options_items():
+    return Response(status_code=200)
+
 
 logger = logging.getLogger("uvicorn")
 logger.level = logging.INFO
@@ -113,7 +129,6 @@ def add_item(
     with open(image_path, "wb") as buffer:
         buffer.write(image_bytes)
 
-
     cursor =db.cursor() 
     
     # categories テーブルにカテゴリが存在するか確認
@@ -121,7 +136,7 @@ def add_item(
     category_row = cursor.fetchone()
 
     if category_row:
-        category_id = category_row["0"]
+        category_id = category_row[0]
     else:
         # カテゴリが存在しない場合、新しく追加
         cursor.execute("INSERT INTO categories (name) VALUES (?)", (category,))
@@ -148,7 +163,6 @@ def add_item(
 
 
 
-
 @app.get("/items")
 def get_items(db: sqlite3.Connection = Depends(get_db)):
     db.row_factory = sqlite3.Row 
@@ -161,11 +175,7 @@ def get_items(db: sqlite3.Connection = Depends(get_db)):
            JOIN categories ON items.category_id = categories.id"""
     )
     rows = cursor.fetchall()
-<<<<<<< HEAD
     items_list = [{"name": row["name"], "category": row["category"], "image_name": row["image_name"]} for row in rows]
-=======
-    items_list = [{"id": id, "name": name, "category": category, "image_name": image_name} for id, name, category, image_name in rows]
->>>>>>> python-step9
     
     
     return {"items": items_list}
