@@ -11,6 +11,7 @@ import hashlib
 import shutil
 import json
 from typing import Union
+from fastapi.responses import Response
 
 
 # Define the path to the images & sqlite3 database
@@ -53,6 +54,21 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+# CORS 設定
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # フロントエンドのURL
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],  # すべてのHTTPメソッドを許可
+    allow_headers=["*"],  # すべてのヘッダーを許可
+)
+
+# ✅ `OPTIONS` メソッドを許可するエンドポイントを手動で追加
+@app.options("/items")
+async def options_items():
+    return Response(status_code=200)
+
 
 logger = logging.getLogger("uvicorn")
 logger.level = logging.INFO
@@ -120,7 +136,7 @@ def add_item(
     category_row = cursor.fetchone()
 
     if category_row:
-        category_id = category_row["id"]
+        category_id = category_row[0]
     else:
         # カテゴリが存在しない場合、新しく追加
         cursor.execute("INSERT INTO categories (name) VALUES (?)", (category,))
@@ -140,6 +156,7 @@ def add_item(
 
 @app.get("/items")
 def get_items(db: sqlite3.Connection = Depends(get_db)):
+    db.row_factory = sqlite3.Row 
     cursor = db.cursor()
     cursor.execute("SELECT * FROM items")
     # JOIN を使ってカテゴリ名を取得（変更点）
@@ -149,7 +166,9 @@ def get_items(db: sqlite3.Connection = Depends(get_db)):
            JOIN categories ON items.category_id = categories.id"""
     )
     rows = cursor.fetchall()
-    items_list = [{"id": id, "name": name, "category": category, "image_name": image_name} for id, name, category, image_name in rows]
+
+    items_list = [{"name": row["name"], "category": row["category"], "image_name": row["image_name"]} for row in rows]
+
     
     
     return {"items": items_list}
@@ -216,6 +235,5 @@ async def get_image(image_name: str):
     if not os.path.exists(image):
         logger.debug(f"Image not found: {image}")
         image = os.path.join(IMAGES_DIR, "default.jpg")
-
 
     return FileResponse(image)

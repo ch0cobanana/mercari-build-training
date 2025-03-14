@@ -85,7 +85,6 @@ export const Listing = ({ onListingCompleted }: Prop) => {
             value={values.name} // ✅ 追加
             onChange={onValueChange}
             required
-            value={values.name}
           />
           <input
             type="text"
@@ -94,7 +93,6 @@ export const Listing = ({ onListingCompleted }: Prop) => {
             placeholder="category"
             value={values.category} // ✅ 追加
             onChange={onValueChange}
-            value={values.category}
           />
           <input
             type="file"
